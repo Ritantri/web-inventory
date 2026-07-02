@@ -6,6 +6,70 @@
     <title>Transaksi Inventory - TRAKINDO</title>
     <link rel="stylesheet" href="<?= base_url('assets/css/transaksi.css') ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Tom Select for searchable dropdowns -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    <style>
+        /* Tom Select Custom Theme */
+        .ts-wrapper .ts-control {
+            border: 1.5px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #fafafa;
+            color: #333;
+            min-height: 46px;
+            transition: all 0.3s ease;
+        }
+        .ts-wrapper.focus .ts-control {
+            border-color: #ffd000;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(255,208,0,0.15);
+        }
+        .ts-wrapper .ts-dropdown {
+            border: 1.5px solid #e0e0e0;
+            border-radius: 12px;
+            margin-top: 4px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            overflow: hidden;
+        }
+        .ts-wrapper .ts-dropdown .ts-dropdown-content {
+            max-height: 240px;
+            padding: 4px;
+        }
+        .ts-wrapper .ts-dropdown .option {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            transition: all 0.15s ease;
+        }
+        .ts-wrapper .ts-dropdown .option:hover,
+        .ts-wrapper .ts-dropdown .active {
+            background: linear-gradient(135deg, #fff8e1, #fffde7);
+            color: #1a1a2e;
+        }
+        .ts-wrapper .ts-dropdown .option.active {
+            background: linear-gradient(135deg, #ffd000, #ffaa00);
+            color: #0a0a0a;
+            font-weight: 600;
+        }
+        .ts-wrapper .ts-control > input {
+            font-size: 14px;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            color: #333;
+        }
+        .ts-wrapper .ts-control > input::placeholder {
+            color: #aaa;
+        }
+        /* No results message */
+        .ts-wrapper .ts-dropdown .no-results {
+            padding: 14px;
+            text-align: center;
+            color: #aaa;
+            font-size: 13px;
+        }
+    </style>
 </head>
 <body>
 
@@ -168,8 +232,8 @@
 
 <div class="form-group">
     <label>Pilih Barang *</label>
-    <select name="barang_id" required>
-        <option value="">— Pilih barang —</option>
+    <select id="selectMasuk" name="barang_id" required placeholder="Ketik untuk mencari barang...">
+        <option value="">— Ketik nama / kode barang —</option>
         <?php foreach($barang as $b): ?>
         <option value="<?= $b['id'] ?>">
             <?= esc($b['kode']) ?> — <?= esc($b['nama']) ?>
@@ -232,8 +296,8 @@
 
 <div class="form-group">
     <label>Pilih Barang *</label>
-    <select name="barang_id" required>
-        <option value="">— Pilih barang —</option>
+    <select id="selectKeluar" name="barang_id" required placeholder="Ketik untuk mencari barang...">
+        <option value="">— Ketik nama / kode barang —</option>
         <?php foreach($barang as $b): ?>
         <option value="<?= $b['id'] ?>">
             <?= esc($b['kode']) ?> — <?= esc($b['nama']) ?> (Stok: <?= $b['stok'] ?>)
@@ -411,6 +475,49 @@ function closeModalKeluar(){
     document.getElementById("overlayKeluar").style.display = "none";
 }
 
+</script>
+
+<!-- Tom Select JS -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script>
+// Initialize Tom Select on both dropdowns
+let tsMasuk, tsKeluar;
+
+function initTomSelect() {
+    // Destroy existing instances if any
+    if (tsMasuk) { tsMasuk.destroy(); tsMasuk = null; }
+    if (tsKeluar) { tsKeluar.destroy(); tsKeluar = null; }
+
+    const tsConfig = {
+        maxOptions: null,
+        create: false,
+        sortField: { field: 'text', direction: 'asc' },
+        render: {
+            no_results: function() {
+                return '<div class="no-results">Barang tidak ditemukan</div>';
+            }
+        }
+    };
+
+    tsMasuk = new TomSelect('#selectMasuk', tsConfig);
+    tsKeluar = new TomSelect('#selectKeluar', tsConfig);
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initTomSelect);
+
+// Refresh Tom Select focus when modal opens
+const origOpenMasuk = openModalMasuk;
+openModalMasuk = function() {
+    origOpenMasuk();
+    if (tsMasuk) setTimeout(() => tsMasuk.focus(), 100);
+};
+
+const origOpenKeluar = openModalKeluar;
+openModalKeluar = function() {
+    origOpenKeluar();
+    if (tsKeluar) setTimeout(() => tsKeluar.focus(), 100);
+};
 </script>
 
 </body>
