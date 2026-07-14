@@ -87,7 +87,7 @@
         <i class="fa-solid fa-user-circle"></i> Trakindo
     </div>
 </div>
-
+<!-- update -->
 <!-- ================= NAV ================= -->
 <div class="nav">
     <a href="<?= base_url('/dashboard') ?>">
